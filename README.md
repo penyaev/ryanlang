@@ -1,6 +1,6 @@
 Ryanlang is a toy language written in Go. It mainly pursues educational and entertainment purposes and is not meant to be used in any kind of a "serious" context. I used it to solve [2022 Advent of Code](https://adventofcode.com/2022). It's started as a way of killing some time onboard a Ryanair flight, hence the name. It is based on [Thorsten Ball's "Writing An Interpreter In Go" book](https://interpreterbook.com/).
 
-It is a simple tree-walking interpreter.
+It is a simple tree-walking interpreter and of course it's not optimized for speed or memory or anything.
 
 To get a taste of what code looks like in ryanlang, check out `src/algo.txt` or `std.txt`.
 
