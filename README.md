@@ -66,7 +66,7 @@ if true {
 #### structs
 ```
 let s = struct {
-v: 10;
+    v: 10;
     inc: func => this.v++; // "this" refers to the struct
 };
 ```
@@ -130,4 +130,11 @@ demo.txt:89:11: undefined identifier: call
         demo.txt:89:11: evaluating call()
         demo.txt:89:1: evaluating let zzz = call()
 
+```
+
+#### unicode support
+```
+let すし = "🍣";
+let さけ = "🍶";
+println(すし + さけ); // "🍣🍶"
 ```

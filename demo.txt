@@ -86,3 +86,7 @@ let min = func(a, b) => if a < b => a else => b;
 let max = func(a, b) => if a > b => a else => b;
 */
 
+// unicode support
+let すし = "🍣";
+let さけ = "🍶";
+println(すし+さけ); // "🍣🍶"
