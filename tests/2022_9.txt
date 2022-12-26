@@ -1,0 +1,142 @@
+exports {
+    test;
+};
+let std = import("std.txt");
+let loop = func(cnt, fn) {
+    let x = 0;
+    while x < cnt {
+        fn(x);
+        x = x+1;
+    };
+};
+let clone = func(array) {
+    let ret = [];
+    loop(len(array), func(i) {
+        ret = append(ret, array.(i));
+    });
+    return ret;
+};
+let abs = func (x) => if x >= 0 => x else => -x;
+let find = func(array, item) {
+    let i = 0;
+    while i < len(array) {
+        if array.(i) == item {
+            return i;
+        };
+        i = i+1;
+    };
+    return -1;
+};
+let append = func(array, item) => array+[item];
+let Set = func {
+    let storage = [];
+    return struct {
+        has: func(x)=>find(storage, x)>-1;
+        add: func(item)=>if !this.has(item) =>storage = append(storage, item);
+        items: func=>storage;
+        size: func=>len(storage);
+    };
+};
+let fillcb = func(cb, cnt) {
+    let result = [];
+    loop(cnt, func(i) => result = append(result, cb()));
+    return result;
+};
+
+let input = [
+    ["R", 5],
+    ["U", 8],
+    ["L", 8],
+    ["D", 3],
+    ["R", 17],
+    ["D", 10],
+    ["L", 25],
+    ["U", 20]
+];
+let ts = std.repeatcb((func=>struct{ x: 0; y: 0; }), 9);
+let h = struct{
+    x: 0;
+    y: 0;
+};
+let dx = 0;
+let dy = 0;
+let visited = Set();
+let keepup = func(t, h) {
+    let rt = struct {
+        x: t.x;
+        y: t.y;
+    };
+
+    if abs(h.x-t.x) > 1 || abs(h.y-t.y) > 1 {
+        // tail is not close enough, update its position
+
+        let dx = h.x-t.x;
+        let dy = h.y-t.y;
+
+        if dx > 1 {
+            dx = 1;
+        };
+        if dx < -1 {
+            dx = -1;
+        };
+        if dy > 1 {
+            dy = 1;
+        };
+        if dy < -1 {
+            dy = -1;
+        };
+
+        rt.x = t.x+dx;
+        rt.y = t.y+dy;
+    };
+    return rt;
+};
+loop(len(input), func(line) {
+    let dir = input.(line).0;
+    let length = input.(line).1;
+    //print(input.(line));
+
+    if dir == "U" {
+        dx = 0;
+        dy = -1;
+    };
+    if dir == "R" {
+        dx = 1;
+        dy = 0;
+    };
+    if dir == "D" {
+        dx = 0;
+        dy = 1;
+    };
+    if dir == "L" {
+        dx = -1;
+        dy = 0;
+    };
+
+    loop(length, func(i) {
+        //print("---");
+        //print(h);
+        //print(ts);
+        // update head position
+        h.x = h.x + dx;
+        h.y = h.y + dy;
+        ts.0 = keepup(ts.0, h);
+        if abs(ts.0.x-h.x) > 1 && abs(ts.0.y-h.y) > 1 {
+            error();
+        };
+
+        loop(8, func(j) {
+            ts.(j+1) = keepup(ts.(j+1), ts.(j));
+
+            if abs(ts.(j+1).x-ts.(j).x) > 1 && abs(ts.(j+1).y-ts.(j).y) > 1 {
+                print(ts);
+                print(h);
+                error();
+            };
+        });
+
+        visited.add(itoa(ts.8.x) + ";" + itoa(ts.8.y));
+        //print(ts);
+    });
+});
+let test=func=>visited.size()==36;

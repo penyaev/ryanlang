@@ -1,0 +1,59 @@
+exports {
+    search;
+    PriorityQueue;
+    test;
+};
+let std = import("std.txt");
+
+// binsearch
+let search = func(array, test) {
+    let l, r = 0, len(array)-1;
+    while l <= r {
+        let i = (l+r)/2;
+        if test(i) {
+            r = i-1;
+        } else {
+            l = i+1;
+        };
+    };
+
+    return r+1;
+};
+let PriorityQueue = func(prio)=>struct{
+    items: [];
+    prio: prio;
+    add: func(item) {
+        let i = search(this.items, func(j)=>(this.prio(this.items.(j))>this.prio(item)));
+        this.items = slice(this.items, 0, i) + [item] + slice(this.items, i, len(this.items));
+    };
+    pop: func {
+        let ret = this.items.0;
+        this.items = slice(this.items, 1, len(this.items));
+        return ret;
+    };
+    size: func=>len(this.items);
+    clear: func=>this.items=[];
+};
+
+let test = func {
+    let a = [1, 2, 3, 4];
+    for tc in [
+        (func=>search(a, func(x) => a.(x) >= 3) == 2),
+        (func=>search(a, func(x) => a.(x) > 10) == len(a)),
+        (func=>search(a, func(x) => a.(x) >= 1) == 0),
+        (func=>search(a, func(x) => a.(x) >= 4) == 3),
+
+        (func {
+            let pq = PriorityQueue(func (x)=>x);
+            pq.add(10);
+            pq.add(5);
+            pq.add(8);
+            pq.add(1);
+            pq.add(3);
+            pq.add(0);
+            pq.add(10);
+            return std.array_compare(pq.items, [0, 1, 3, 5, 8, 10, 10]);
+        })
+    ] => if !tc() => return false;
+    return true;
+};

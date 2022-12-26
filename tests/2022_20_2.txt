@@ -1,0 +1,78 @@
+exports {
+    test;
+};
+let std = import("std.txt");
+let lines = readlines("tests/2022_20_input_demo.txt"); // 1623178306
+//let lines = readlines("tests/2022_20_input.txt"); // 3760092545849
+let Node = func(left, right, value) => struct{
+    left: left;
+    right: right;
+    value: value;
+    done: false;
+};
+let zero = struct{};
+
+let root = Node(struct{}, struct{}, 0);
+let cur = root;
+let nodes = [];
+for line in lines {
+    let next = Node(cur, struct{}, atoi(line)*811589153);
+    cur.right = next;
+    cur = next;
+    if next.value == 0 {
+        zero = next;
+    };
+    nodes += [next];
+};
+cur.right = root.right;
+root.right.left = cur;
+root = cur.right;
+
+let debug = func {
+    let cur = root;
+    for i in std.range(cnt) {
+        println(itoa(cur.left.value) + " - [" + itoa(cur.value) + "] - " + itoa(cur.right.value) + ": " + if cur.done => "true" else => "false");
+        cur = cur.right;
+    };
+};
+
+let walk = func(node, dist, correction) {
+    let d = dist % (cnt-1+correction);
+    let search = node;
+    while d != 0 {
+        if d > 0 {
+            d--;
+            search = search.right;
+        } else {
+            d++;
+            search = search.left;
+        };
+    };
+    if dist < 0 {
+        search = search.left;
+    };
+    return search;
+};
+
+let done = 0;
+let cnt = len(lines);
+for round in std.range(10) {
+    //println(round);
+    for node in nodes {
+        if (node.value%(cnt-1)) == 0 {
+            continue;
+        };
+
+        let search = walk(node, node.value, 0);
+
+        node.left.right = node.right;
+        node.right.left = node.left;
+
+        search.right.left = node;
+        node.right = search.right;
+        search.right = node;
+        node.left = search;
+    };
+};
+//println(walk(zero, 1000, 1).value+walk(zero, 2000, 1).value+walk(zero, 3000, 1).value); // 1623178306
+let test = func=>(walk(zero, 1000, 1).value+walk(zero, 2000, 1).value+walk(zero, 3000, 1).value==1623178306);

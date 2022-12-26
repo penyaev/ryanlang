@@ -1,0 +1,103 @@
+exports {
+    sum;
+    mult;
+    mods;
+    test;
+};
+let std = import("std.txt");
+
+let trimzeroes = func(result) {
+    let trimmed = "";
+    let leading = true;
+    for i in std.range(len(result)) {
+        if leading {
+            if result.(i) == "0" {
+                continue;
+            } else {
+                leading = false;
+            };
+        };
+        trimmed += result.(i);
+    };
+    if trimmed == "" {
+        trimmed = "0";
+    };
+    return trimmed;
+};
+let sum = func(x, y) {
+    if len(x) < len(y) {
+        for i in std.range(len(y)-len(x)) => x = "0" + x;
+    } else {
+        for i in std.range(len(x)-len(y)) => y = "0" + y;
+    };
+
+    let i = len(x)-1;
+    let carry = 0;
+    let result = "";
+    while i >= 0 {
+        let prod = atoi(x.(i)) + atoi(y.(i)) + carry;
+        result = itoa(prod % 10) + result;
+        carry = prod / 10;
+        i -= 1;
+    };
+    result = itoa(carry) + result;
+
+    return trimzeroes(result);
+};
+
+let mult = func(x, y) {
+    let i = len(x)-1;
+    let total = "0";
+    while i >= 0 {
+        let result = "";
+        for z in std.range(len(x)-1-i) => result += "0";
+
+        let j = len(y)-1;
+        let carry = 0;
+        while j >= 0 {
+            let prod = atoi(x.(i)) * atoi(y.(j)) + carry;
+            result = itoa(prod%10) + result;
+            carry = prod / 10;
+
+            j -= 1;
+        };
+        result = itoa(carry) + result;
+        total = sum(total, result);
+
+        i -= 1;
+    };
+
+    return total;
+};
+let strslice = func(s, start, end) {
+    let result = "";
+    for i in std.xrange(start, end) {
+        result += s.(i);
+    };
+    return result;
+};
+let mods = func(x, y) {
+    let i = 0;
+
+    let part = "0";
+    while i < len(x) {
+        part += x.(i);
+        if atoi(part) >= y {
+            x = itoa(atoi(part) % y) + strslice(x, i+1, len(x));
+            part = "0";
+            i = -1;
+        };
+        i += 1;
+    };
+
+    return itoa(atoi(part) % y);
+};
+let test = func {
+    for tc in [
+        (func=>mult("123", "234") == "28782"),
+        (func=>mult("12873192873819273912", "8971298371982739182738912739") == "115489254271114651639185946018181901061307164968"),
+        (func=>sum("12873192873819273912", "8971298371982739182738912739") == "8971298384855932056558186651"),
+        (func=>mods("12873192873819273912", 107) == "77")
+    ] => if !tc() => return false;
+    return true;
+};

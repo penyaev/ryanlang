@@ -1,0 +1,35 @@
+let modules = [
+    "tests/2022_18_1.txt",
+    "tests/2022_18_2.txt",
+    "tests/2022_14.txt",
+    "tests/2022_13.txt",
+    "tests/2022_12.txt",
+    "tests/2022_11.txt",
+    "tests/2022_9.txt",
+    "tests/2022_21_1.txt",
+    "tests/2022_21_2.txt",
+    "tests/2022_20_2.txt",
+    "tests/2022_24_2.txt",
+    "tests/2022_22_2.txt",
+
+    "bignum.txt",
+    "src/algo.txt"
+];
+let total = 0;
+let failed = 0;
+for module in modules {
+    total += 1;
+    print(module + ": ");
+    if import(module).test() {
+        println("OK");
+    } else {
+        println("FAILED");
+        failed += 1;
+    };
+};
+println("");
+if failed > 0 {
+    println(itoa(failed) + " tests failed");
+} else {
+    println("ALL OK");
+};

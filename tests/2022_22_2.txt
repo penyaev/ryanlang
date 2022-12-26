@@ -1,0 +1,220 @@
+exports {
+    test;
+};
+let std = import("std.txt");
+//let lines = readlines("2022_22_input_demo.txt"); // 5031
+let lines = readlines("tests/2022_22_input.txt"); // 195032
+
+let Field = func(size)=>struct{
+    f: [];
+    w: [];
+    size: size;
+    add: func(line) {
+        this.f += [line];
+        let i = 0;
+        while line.(i) == " " {
+            i++;
+        };
+        this.w += [struct{from: i; to: len(line)-1;}];
+    };
+    at: func(x, y) {
+        if y < 0 || y >= len(this.f) {
+            return " ";
+        };
+        let line = this.f.(y);
+        let from, to = this.w.(y).from, this.w.(y).to;
+        if x < from || x > to {
+            return " ";
+        };
+
+        return line.(x);
+    };
+    right: func(x, y) {
+        let dir = 0; // right
+        let nx, ny, nd = x+1, y, dir;
+        let cell = this.at(nx, ny);
+
+        if cell == " " {
+            let ys = ny/this.size;
+            if ys == 0 { // 2->5
+                ny = this.size*3-1-y%this.size;
+                nx = this.size*2-1;
+                nd = 2; // left
+            } else if ys == 1 { // 3->2
+                ny = this.size*1-1;
+                nx = this.size*2+(y%this.size);
+                nd = 3; // up
+            } else if ys == 2 { // 5 -> 2
+                ny = this.size-1-(y%this.size);
+                nx = this.size*3-1;
+                nd = 2; // left
+            } else if ys == 3 { // 6 -> 5
+                ny = this.size*3-1;
+                nx = this.size*1+(y%this.size);
+                nd = 3; // up
+            } else {
+                panic(ys);
+            };
+
+            cell = this.at(nx, ny);
+        };
+
+        if cell == "#" {
+            return x, y, dir;
+        } else {
+            return nx, ny, nd;
+        };
+    };
+    left: func(x, y) {
+        let dir = 2; // left
+        let nx, ny, nd = x-1, y, dir;
+        let cell = this.at(nx, ny);
+
+        if cell == " " {
+            let ys = ny/this.size;
+            if ys == 0 { // 1->4
+                ny = this.size*3-1-y%this.size;
+                nx = 0;
+                nd = 0; // right
+            } else if ys == 1 { // 3->4
+                ny = this.size*2;
+                nx = y%this.size;
+                nd = 1; // down
+            } else if ys == 2 { // 4 -> 1
+                ny = this.size-1-y%this.size;
+                nx = this.size;
+                nd = 0; // right
+            } else if ys == 3 { // 6 -> 1
+                ny = 0;
+                nx = (this.size)+(y%this.size);
+                nd = 1; // down
+            } else {
+                panic(ny);
+            };
+
+            cell = this.at(nx, ny);
+        };
+
+        if cell == "#" {
+            return x, y, dir;
+        } else {
+            return nx, ny, nd;
+        };
+    };
+    down: func(x, y) {
+        let dir = 1; // down
+        let nx, ny, nd = x, y+1, dir;
+        let cell = this.at(nx, ny);
+
+        if cell == " " {
+            let xs = nx/this.size;
+            if xs == 0 { // 6->2
+                ny = 0;
+                nx = (this.size*2)+x%this.size;
+                nd = 1; // down
+            } else if xs == 1 { // 5->6
+                ny = this.size*3+x%this.size;
+                nx = this.size-1;
+                nd = 2; // left
+            } else if xs == 2 { // 2 -> 3
+                ny = this.size*1+x%this.size;
+                nx = this.size*2-1;
+                nd = 2; // left
+            } else {
+                panic(ys);
+            };
+
+            cell = this.at(nx, ny);
+        };
+
+        if cell == "#" {
+            return x, y, dir;
+        } else {
+            return nx, ny, nd;
+        };
+    };
+    up: func(x, y) {
+        let dir = 3; // up
+        let nx, ny, nd = x, y-1, dir;
+        let cell = this.at(nx, ny);
+
+        if cell == " " {
+            let xs = nx/this.size;
+            if xs == 0 { // 4->3
+                ny = this.size+x%this.size;
+                nx = this.size;
+                nd = 0; // right
+            } else if xs == 1 { // 1->6
+                ny = this.size*3+x%this.size;
+                nx = 0;
+                nd = 0; // right
+            } else if xs == 2 { // 2 -> 6
+                ny = this.size*4-1;
+                nx = x%this.size;
+                nd = 3; // up
+            } else {
+                panic(xs);
+            };
+
+            cell = this.at(nx, ny);
+        };
+
+        if cell == "#" {
+            return x, y, dir;
+        } else {
+            return nx, ny, nd;
+        };
+    };
+};
+
+let parse = func(s) {
+    let ret = [];
+    let buf = "";
+    for i in std.range(len(s)) {
+        if s.(i) == "L" || s.(i) == "R" {
+            ret += [atoi(buf), s.(i)];
+            buf = "";
+        } else {
+            buf += s.(i);
+        };
+    };
+    ret += [atoi(buf)];
+    return ret;
+};
+
+let field = Field(50);
+for line in lines {
+    if line == "" {
+        break;
+    };
+    field.add(line);
+};
+let instruction = parse(std.last(lines));
+
+let from, to = field.w.0.from, field.w.0.to;
+let x, y = from, 0;
+let dirs = ["right", "down", "left", "up"];
+let dir = 0;
+
+for i in instruction {
+    //println(itoa(x) + ";" + itoa(y));
+    if std.isnumber(i) {
+        for j in std.range(i) {
+            x, y, dir = field.(dirs.(dir))(x, y);
+        };
+    } else if i == "R" {
+        dir++;
+        if dir >= len(dirs) {
+            dir -= len(dirs);
+        };
+    } else if i == "L" {
+        dir--;
+        if dir < 0 {
+            dir += len(dirs);
+        };
+    } else {
+        panic(i);
+    };
+};
+let score = (y+1)*1000+(x+1)*4+dir;
+let test = func=>score==195032;

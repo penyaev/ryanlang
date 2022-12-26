@@ -1,0 +1,177 @@
+let std = import("std.txt");
+let algo = import("src/algo.txt");
+//let lines = readlines("2022_24_input_demo.txt"); // 18
+let lines = readlines("2022_24_input.txt"); // 262
+
+let Cell = func=>struct{
+    u: false;
+    r: false;
+    d: false;
+    l: false;
+    w: false;
+};
+let Field = func(w, h)=>struct{
+    w: w;
+    h: h;
+    finish: func(x, y)=>y==this.h-1 && x == this.w-2;
+    f: for y in std.range(h)=>for x in std.range(w)=>Cell();
+    at: func(x, y) => this.f.(y).(x);
+    set: func(x, y, d) => this.f.(y).(x).(d) = true;
+    free: func(x, y) {
+        if x < 0 || y < 0 || x >= this.w || y >= this.h {
+            return false;
+        };
+        let cell = this.at(x, y);
+        return !cell.u && !cell.r && !cell.d && !cell.l && !this.wall(x, y);
+    };
+    wall: func(x, y)=>this.at(x, y).w;
+    next: func{
+        let new = Field(this.w, this.h);
+        for y in std.range(this.h) {
+            for x in std.range(this.w) {
+                if this.at(x, y).l {
+                    let nx = x-1;
+                    if this.wall(nx, y) {
+                        nx = this.w-2;
+                    };
+                    new.set(nx, y, "l");
+                };
+                if this.at(x, y).r {
+                    let nx = x+1;
+                    if this.wall(nx, y) {
+                        nx = 1;
+                    };
+                    new.set(nx, y, "r");
+                };
+                if this.at(x, y).u {
+                    let ny = y-1;
+                    if this.wall(x, ny) {
+                        ny = this.h-2;
+                    };
+                    new.set(x, ny, "u");
+                };
+                if this.at(x, y).d {
+                    let ny = y+1;
+                    if this.wall(x, ny) {
+                        ny = 1;
+                    };
+                    new.set(x, ny, "d");
+                };
+                if this.wall(x, y) {
+                    new.set(x, y, "w");
+                };
+            };
+        };
+        return new;
+    };
+    print: func() {
+        for line in this.f {
+            for cell in line {
+                let v = "";
+                if cell.u {
+                    v += "^";
+                };
+                if cell.r {
+                    v += ">";
+                };
+                if cell.d {
+                    v += "v";
+                };
+                if cell.l {
+                    v += "<";
+                };
+                if cell.w {
+                    v += "#";
+                };
+
+                if len(v) == 0 {
+                    print(".");
+                } else if len(v) == 1 {
+                    print(v);
+                } else {
+                    print(itoa(len(v)));
+                };
+            };
+            println("");
+        };
+    };
+};
+let States = func(initial)=>struct{
+    m: map{0: initial;};
+    last: 0;
+    get: func(time) {
+        while this.last < time {
+            let prev = this.m.(this.last);
+            this.last++;
+            this.m.(this.last) = prev.next();
+        };
+        return this.m.(time);
+    };
+};
+
+let field = Field(len(lines.0), len(lines));
+for y, line in lines {
+    for x in std.range(len(line)) {
+        let d = line.(x);
+        if d == "." {
+            continue;
+        };
+        if d == "#" {
+            d = "w";
+        } else if d == ">" {
+            d = "r";
+        } else if d == "v" {
+            d = "d";
+        } else if d == "<" {
+            d = "l";
+        } else if d == "^" {
+            d = "u";
+        };
+
+        field.set(x, y, d);
+    };
+};
+let states = States(field);
+
+
+
+let State = func(x, y, time)=>struct{
+    x: x;
+    y: y;
+    time: time;
+    dist: func=>std.abs(this.x-(field.w-2))+std.abs(this.y-(field.h-1));
+    key: func=>itoa(this.x)+";"+itoa(this.y)+";"+itoa(this.time);
+};
+let queue = algo.PriorityQueue(func(s)=>s.time+s.dist());
+queue.add(State(1, 0, 0));
+let visited = map{};
+while queue.size() > 0 {
+    let item = queue.pop();
+    if has(visited, item.key()) {
+        continue;
+    };
+    visited.(item.key()) = true;
+    let field = states.get(item.time+1);
+    if field.finish(item.x, item.y) {
+        println(item.time);
+        break;
+    };
+
+    if field.free(item.x+1, item.y) {
+        queue.add(State(item.x+1, item.y, item.time+1));
+    };
+    if field.free(item.x-1, item.y) {
+        queue.add(State(item.x-1, item.y, item.time+1));
+    };
+    if field.free(item.x, item.y+1) {
+        queue.add(State(item.x, item.y+1, item.time+1));
+    };
+    if field.free(item.x, item.y-1) {
+        queue.add(State(item.x, item.y-1, item.time+1));
+    };
+    if field.free(item.x, item.y) {
+        queue.add(State(item.x, item.y, item.time+1));
+    };
+};
+
+

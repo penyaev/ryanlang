@@ -1,0 +1,21 @@
+let Stack = func() {
+    let storage = [];
+    return struct {
+        top: func=>last(storage);
+        push: func(x) {
+            storage = append(storage, x);
+        };
+        size: func=>len(storage);
+        pop: func {
+            let x = 0;
+            let new = [];
+            let ret = last(storage);
+            while x<len(storage)-1 {
+                new = append(new, storage.(x));
+                x = x+1;
+            };
+            storage = new;
+            return ret;
+        };
+    };
+};

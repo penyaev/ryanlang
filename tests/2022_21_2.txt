@@ -1,0 +1,95 @@
+exports {
+    test;
+};
+let std = import("std.txt");
+//let lines = readlines("tests/2022_21_input.txt"); // 152
+let lines = readlines("tests/2022_21_input2.txt"); // 157714751182692
+let ExprReturn = func(value) => struct {kind: "value"; value: value; };
+let ExprCalculate = func(op1, op, op2) => struct {kind: "calc"; op1: op1; op: op; op2: op2; };
+let ExprX = func() => struct {kind: "x"; };
+let keys = map{};
+for line in lines {
+    let parts = strsplit(line, ": ");
+    let key = parts.0;
+    let expr = parts.1;
+
+    let expression = struct{};
+    if std.isdigit(expr.0) {
+        expression = ExprReturn(atoi(expr));
+    } else {
+        let parts2 = strsplit(expr, " ");
+        let op1 = parts2.0;
+        let op = parts2.1;
+        let op2 = parts2.2;
+
+        expression = ExprCalculate(op1, op, op2);
+    };
+
+    keys.(key) = expression;
+};
+
+let calc = func(key) {
+    if key == "humn" {
+        return ExprX();
+    };
+
+    let ret = 0;
+    let item = keys.(key);
+    if item.kind == "value" {
+        ret = item.value;
+    } else {
+        let left, right = calc(item.op1), calc(item.op2);
+        let values = std.isnumber(left) && std.isnumber(right);
+        if item.op == "*" && values {
+            ret = left * right;
+        } else if item.op == "/" && values {
+            ret = left/right;
+        } else if item.op == "+" && values {
+            ret = left+right;
+        } else if item.op == "-" && values {
+            ret = left-right;
+        } else {
+            return ExprCalculate(left, item.op, right);
+        };
+        //keys.(key) = ExprReturn(ret);
+    };
+    return ret;
+};
+let reverse = func(value, node) {
+    // value = node.op1 node.op node.op2
+    while node.kind != "x" {
+        if std.isnumber(node.op2) { // value = node.op1 node.op num
+            if node.op == "+" { // value = node.op1 + num
+                value = value - node.op2 ;
+            } else if node.op == "-" { // value = node.op1 - num
+                value = value + node.op2;
+            } else if node.op == "*" { // value = node.op1 * num
+                value = value / node.op2;
+            } else if node.op == "/" { // value = node.op1 / num
+                value = value * node.op2;
+            };
+            node = node.op1;
+        } else if std.isnumber(node.op1) {
+            if node.op == "+" { // value = num + node.op2
+                value = value - node.op1;
+            } else if node.op == "-" { // value = num - node.op2
+                value = node.op1 - value;
+            } else if node.op == "*" { // value = num * node.op2
+                value = value / node.op1;
+            } else if node.op == "/" { // value = num / node.op2
+                value = node.op1 / value;
+            };
+            node = node.op2;
+        } else {
+            panic("neither of the two ops is a number");
+        };
+    };
+
+    return value;
+};
+
+//root: rjmz + nfct
+//println(calc("rjmz"));
+//println(reverse(calc("nfct"), calc("rjmz"))); // 3373767893067
+let test = func=>reverse(calc("nfct"), calc("rjmz"))==3373767893067;
+//println(keys);

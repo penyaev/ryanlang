@@ -1,0 +1,101 @@
+exports {
+    test;
+};
+let std = import("std.txt");
+//let input = [
+//  "498,4 -> 498,6 -> 496,6",
+//  "503,4 -> 502,4 -> 502,9 -> 494,9"
+//];
+let input = readlines("tests/2022_14_input_demo.txt");
+let Point = func(x, y) => struct {x: x; y: y;};
+
+let field = struct {
+    rect: struct{
+        x1: 1000;
+        y1: 1000;
+        x2: 0;
+        y2: 0;
+        update: func(x, y) {
+            this.x1 = std.min(x, this.x1);
+            this.x2 = std.max(x, this.x2);
+
+            this.y1 = std.min(y, this.y1);
+            this.y2 = std.max(y, this.y2);
+        };
+    };
+    print: func{
+        for y in std.xrange(this.rect.y1, this.rect.y2+1) {
+            for x in std.xrange(this.rect.x1, this.rect.x2+1) {
+                print(this.at(x, y));
+            };
+            println("");
+        };
+    };
+    f: std.repeatcb((func=>std.repeat(".", 1000)), 500);
+    at: func(x, y) => this.f.(y).(x);
+    free: func(x, y) => (y < (2+this.rect.y2)) && this.at(x, y) == ".";
+    abyss: func(x, y) => y > this.rect.y2;
+    setrock: func(x, y) {
+        this.f.(y).(x) = "#";
+    };
+    setsand: func(x, y) {
+        this.f.(y).(x) = "o";
+    };
+    drawrock: func(from, to) {
+        if from.x == to.x { // vertical
+            for y in std.xrange(std.min(from.y, to.y), std.max(from.y, to.y)+1) {
+                this.setrock(from.x, y);
+                this.rect.update(from.x, y);
+            };
+        } else { // horizontal
+            for x in std.xrange(std.min(from.x, to.x), std.max(from.x, to.x)+1) {
+                this.setrock(x, from.y);
+                this.rect.update(x, from.y);
+            };
+        };
+    };
+};
+
+for line in input {
+    let points = for s in strsplit(line, " -> ") => func(s) {
+        let xy = for v in strsplit(s, ",") => atoi(v);
+        return Point(xy.0, xy.1);
+    }(s);
+
+    for i in std.xrange(1, len(points)) {
+        field.drawrock(points.(i-1), points.(i));
+    };
+};
+
+let units = 0;
+while true {
+    let p = Point(500, 0);
+    if !field.free(p.x, p.y) {
+        break;
+    };
+
+    while /*!field.abyss(p.x, p.y)*/true {
+        if field.free(p.x, p.y+1) {
+            p.y += 1;
+        } else if field.free(p.x-1, p.y+1) {
+            p.x -= 1;
+            p.y += 1;
+        } else if field.free(p.x+1, p.y+1) {
+            p.x += 1;
+            p.y += 1;
+        } else {
+            field.setsand(p.x, p.y);
+            units += 1;
+            break;
+        };
+    };
+
+    //if field.abyss(p.x, p.y) {
+    //    break;
+    //};
+};
+
+//field.print();
+//println(field.rect);
+//println(units); // 27566
+let test = func=>units==93;

@@ -1,0 +1,51 @@
+exports {
+    test;
+};
+let std = import("std.txt");
+//let lines = readlines("tests/2022_21_input.txt"); // 152
+let lines = readlines("tests/2022_21_input2.txt"); // 157714751182692
+let ExprReturn = func(value) => struct {kind: "value"; value: value; };
+let ExprCalculate = func(op1, op, op2) => struct {kind: "calc"; op1: op1; op: op; op2: op2; };
+let keys = map{};
+for line in lines {
+    let parts = strsplit(line, ": ");
+    let key = parts.0;
+    let expr = parts.1;
+
+    let expression = struct{};
+    if std.isdigit(expr.0) {
+        expression = ExprReturn(atoi(expr));
+    } else {
+        let parts2 = strsplit(expr, " ");
+        let op1 = parts2.0;
+        let op = parts2.1;
+        let op2 = parts2.2;
+
+        expression = ExprCalculate(op1, op, op2);
+    };
+
+    keys.(key) = expression;
+};
+
+let calc = func(key) {
+    let ret = 0;
+    let item = keys.(key);
+    if item.kind == "value" {
+        ret = item.value;
+    } else {
+        if item.op == "*" {
+            ret = calc(item.op1)*calc(item.op2);
+        } else if item.op == "/" {
+            ret = calc(item.op1)/calc(item.op2);
+        } else if item.op == "+" {
+            ret = calc(item.op1)+calc(item.op2);
+        } else if item.op == "-" {
+            ret = calc(item.op1)-calc(item.op2);
+        };
+        keys.(key) = ExprReturn(ret);
+    };
+    return ret;
+};
+let test = func =>calc("root")==157714751182692;
+//println(calc("root"));
+//println(keys);

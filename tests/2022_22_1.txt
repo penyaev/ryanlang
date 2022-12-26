@@ -1,0 +1,140 @@
+let std = import("std.txt");
+//let lines = readlines("2022_22_input_demo.txt"); // 6032
+let lines = readlines("2022_22_input.txt");
+
+let Field = func=>struct{
+    f: [];
+    w: [];
+    add: func(line) {
+        this.f += [line];
+        let i = 0;
+        while line.(i) == " " {
+            i++;
+        };
+        this.w += [(i, len(line)-1)];
+    };
+    at: func(x, y) {
+        if y < 0 || y >= len(this.f) {
+            return " ";
+        };
+        let line = this.f.(y);
+        let from, to = this.w.(y);
+        if x < from || x > to {
+            return " ";
+        };
+
+        return line.(x);
+    };
+    right: func(x, y) {
+        let nx = x+1;
+        let cell = this.at(nx, y);
+        if cell == " " {
+            let from, to = this.w.(y);
+            nx = from;
+            cell = this.at(nx, y);
+        };
+        if cell == "#" {
+            return x, y;
+        } else {
+            return nx, y;
+        };
+    };
+    left: func(x, y) {
+        let nx = x-1;
+        let cell = this.at(nx, y);
+        if cell == " " {
+            let from, to = this.w.(y);
+            nx = to;
+            cell = this.at(nx, y);
+        };
+        if cell == "#" {
+            return x, y;
+        } else {
+            return nx, y;
+        };
+    };
+    down: func(x, y) {
+        let ny = y+1;
+        let cell = this.at(x, ny);
+        while cell == " " {
+            ny++;
+            if ny >= len(this.f) {
+                ny = 0;
+            };
+            cell = this.at(x, ny);
+        };
+        if cell == "#" {
+            return x, y;
+        } else {
+            return x, ny;
+        };
+    };
+    up: func(x, y) {
+        let ny = y-1;
+        let cell = this.at(x, ny);
+        while cell == " " {
+            ny--;
+            if ny < 0 {
+                ny = len(this.f)-1;
+            };
+            cell = this.at(x, ny);
+        };
+        if cell == "#" {
+            return x, y;
+        } else {
+            return x, ny;
+        };
+    };
+};
+
+let parse = func(s) {
+    let ret = [];
+    let buf = "";
+    for i in std.range(len(s)) {
+        if s.(i) == "L" || s.(i) == "R" {
+            ret += [atoi(buf), s.(i)];
+            buf = "";
+        } else {
+            buf += s.(i);
+        };
+    };
+    ret += [atoi(buf)];
+    return ret;
+};
+
+let field = Field();
+for line in lines {
+    if line == "" {
+        break;
+    };
+    field.add(line);
+};
+let instruction = parse(std.last(lines));
+
+let from, to = field.w.0;
+let x, y = from, 0;
+let dirs = ["right", "down", "left", "up"];
+let dir = 0;
+
+for i in instruction {
+    //println(itoa(x) + ";" + itoa(y));
+    if std.isnumber(i) {
+        for j in std.range(i) {
+            x, y = field.(dirs.(dir))(x, y);
+        };
+    } else if i == "R" {
+        dir++;
+        if dir >= len(dirs) {
+            dir -= len(dirs);
+        };
+    } else if i == "L" {
+        dir--;
+        if dir < 0 {
+            dir += len(dirs);
+        };
+    } else {
+        panic(i);
+    };
+};
+let score = (y+1)*1000+(x+1)*4+dir;
+println(score);
