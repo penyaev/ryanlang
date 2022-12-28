@@ -1,7 +1,7 @@
 exports {
     test;
 };
-let std = import("std.txt");
+let std = import("src/std.txt");
 //let lines = readlines("tests/2022_21_input.txt"); // 152
 let lines = readlines("tests/2022_21_input2.txt"); // 157714751182692
 let ExprReturn = func(value) => struct {kind: "value"; value: value; };

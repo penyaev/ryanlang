@@ -1,7 +1,7 @@
 exports {
     test;
 };
-let std = import("std.txt");
+let std = import("src/std.txt");
 let algo = import("src/algo.txt");
 let lines = readlines("tests/2022_24_input_demo.txt"); // 54
 //let lines = readlines("tests/2022_24_input.txt"); // 785

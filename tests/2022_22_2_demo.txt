@@ -1,4 +1,4 @@
-let std = import("std.txt");
+let std = import("src/std.txt");
 let lines = readlines("2022_22_input_demo.txt"); // 5031
 //let lines = readlines("2022_22_input.txt"); // ???
 

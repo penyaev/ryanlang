@@ -245,12 +245,15 @@ func (e *Evaluator) fieldAssignExpressionValue(fa ast.FieldAccessExpression, val
 		}
 		hash := rval.(object.Hashable).Hash()
 		currentValue, ok := lval.(*object.Map).Fields[hash]
-		if ok && currentValue.Type() != value.Type() {
+		if ok && currentValue.Value.Type() != value.Type() {
 			return &object.Error{
-				Msg: "field already holds a value of type " + currentValue.Type().String() + ", got: " + value.Type().String(),
+				Msg: "field already holds a value of type " + currentValue.Value.Type().String() + ", got: " + value.Type().String(),
 			}
 		}
-		lval.(*object.Map).Fields[hash] = value
+		lval.(*object.Map).Fields[hash] = object.MapItem{
+			Key:   rval,
+			Value: value,
+		}
 	} else if lval.Type() == object.ARRAY {
 		if rval = e.expectEvalToType(fa.Right, object.NUMBER); object.IsError(rval) {
 			return rval
@@ -439,14 +442,20 @@ func (e *Evaluator) evalIfExpression(expr ast.IfExpression) object.Object {
 func (e *Evaluator) evalGtExpression(expr ast.GtExpression) object.Object {
 	var left, right object.Object
 
-	if left = e.expectEvalToType(expr.Left, object.NUMBER); object.IsError(left) {
+	if left = e.expectEvalToAnyType(expr.Left); object.IsError(left) {
 		return left
 	}
-	if right = e.expectEvalToType(expr.Right, object.NUMBER); object.IsError(right) {
+	if right = e.expectEvalToAnyType(expr.Right); object.IsError(right) {
 		return right
 	}
 
-	return &object.Boolean{Value: left.(*object.Number).Value > right.(*object.Number).Value}
+	if left.Type() == object.NUMBER && right.Type() == object.NUMBER {
+		return &object.Boolean{Value: left.(*object.Number).Value > right.(*object.Number).Value}
+	} else if left.Type() == object.STRING && right.Type() == object.STRING {
+		return &object.Boolean{Value: left.(*object.String).Value > right.(*object.String).Value}
+	} else {
+		return &object.Error{Msg: "don't know how to compare types: " + left.Type().String() + ", " + right.Type().String(), Loc: expr.Left.Location()}
+	}
 }
 func (e *Evaluator) evalLtExpression(expr ast.LtExpression) object.Object {
 	var left, right object.Object
@@ -525,7 +534,7 @@ func (e *Evaluator) evalStructExpression(expr ast.StructExpression) object.Objec
 }
 func (e *Evaluator) evalMapExpression(expr ast.MapExpression) object.Object {
 	ret := &object.Map{
-		Fields: map[string]object.Object{},
+		Fields: map[string]object.MapItem{},
 	}
 
 	//newEnv := object.NewEnvironment()
@@ -540,7 +549,10 @@ func (e *Evaluator) evalMapExpression(expr ast.MapExpression) object.Object {
 		if fieldVal = e.expectEvalToAnyType(mapField.Value); object.IsError(fieldVal) {
 			return fieldVal
 		}
-		ret.Fields[field.(object.Hashable).Hash()] = fieldVal
+		ret.Fields[field.(object.Hashable).Hash()] = object.MapItem{
+			Key:   field,
+			Value: fieldVal,
+		}
 		//newEnv.Set(field, fieldVal)
 	}
 
@@ -588,10 +600,12 @@ func (e *Evaluator) evalFieldAccessExpression(expr ast.FieldAccessExpression) ob
 			return rval
 		}
 		var ok bool
-		val, ok = s.(*object.Map).Fields[rval.(object.Hashable).Hash()]
+		var item object.MapItem
+		item, ok = s.(*object.Map).Fields[rval.(object.Hashable).Hash()]
 		if !ok {
 			return &object.Error{Msg: "map item does not exist: " + rval.(object.Hashable).Hash()}
 		}
+		val = item.Value
 	} else if s.Type() == object.MODULE {
 		if rval = e.expectEvalToType(expr.Right, object.STRING); object.IsError(rval) {
 			return rval
@@ -689,20 +703,39 @@ func (e *Evaluator) evalForExpression(expr ast.ForExpression) object.Object {
 	var r object.Object
 	var ret object.Object = &object.Null{}
 
-	// todo: support maps
-	if r = e.expectEvalToType(expr.Range, object.ARRAY); object.IsError(r) {
+	if r = e.expectEvalToAnyType(expr.Range); object.IsError(r) {
 		return r
+	}
+
+	var rangeItems []struct {
+		index object.Object
+		value object.Object
+	}
+	if r.Type() == object.ARRAY {
+		for k, v := range r.(*object.Array).Items {
+			rangeItems = append(rangeItems, struct {
+				index object.Object
+				value object.Object
+			}{index: &object.Number{Value: k}, value: v})
+		}
+	} else if r.Type() == object.MAP {
+		for _, item := range r.(*object.Map).Fields {
+			rangeItems = append(rangeItems, struct {
+				index object.Object
+				value object.Object
+			}{index: item.Key, value: item.Value})
+		}
 	}
 
 	_, returnArrowExpression := expr.Body.(ast.ArrowExpression)
 	arrowItems := &object.Array{}
 
 	derivedEvaluator := NewWithEnv(e.env.Derive())
-	for i, v := range r.(*object.Array).Items {
+	for _, v := range rangeItems {
 		if expr.Index != nil {
-			derivedEvaluator.env.Set(expr.Index.Name, &object.Number{Value: i})
+			derivedEvaluator.env.Set(expr.Index.Name, v.index)
 		}
-		derivedEvaluator.env.Set(expr.Value.Name, v)
+		derivedEvaluator.env.Set(expr.Value.Name, v.value)
 
 		if ret = derivedEvaluator.expectEvalToAnyType(expr.Body); object.IsError(ret) {
 			return ret

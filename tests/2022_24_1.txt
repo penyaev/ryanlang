@@ -1,4 +1,4 @@
-let std = import("std.txt");
+let std = import("src/std.txt");
 let algo = import("src/algo.txt");
 //let lines = readlines("2022_24_input_demo.txt"); // 18
 let lines = readlines("2022_24_input.txt"); // 262

@@ -223,14 +223,18 @@ func (s Struct) Type() Type {
 	return STRUCT
 }
 
+type MapItem struct {
+	Key   Object
+	Value Object
+}
 type Map struct {
-	Fields map[string]Object
+	Fields map[string]MapItem
 }
 
 func (m Map) String() string {
 	strs := []string{}
-	for k, v := range m.Fields {
-		strs = append(strs, fmt.Sprintf("%s: %s", k, v.String()))
+	for _, v := range m.Fields {
+		strs = append(strs, fmt.Sprintf("%s: %s", v.Key.String(), v.Value.String()))
 	}
 	return fmt.Sprintf("map{%s}", strings.Join(strs, "; "))
 }

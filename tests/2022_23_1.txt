@@ -1,0 +1,127 @@
+let std = import("src/std.txt");
+//let lines = readlines("2022_23_input_demo.txt"); // 110
+let lines = readlines("2022_23_input.txt"); // 4254
+
+let xykey = func(x, y)=>"x="+itoa(x)+";y="+itoa(y);
+let Elf = func(x, y)=>struct{
+    x: x;
+    y: y;
+    key: func=>xykey(this.x, this.y);
+    a: func=>[
+            xykey(this.x-1, this.y-1), xykey(this.x, this.y-1), xykey(this.x+1, this.y-1),
+            xykey(this.x-1, this.y  ),                          xykey(this.x+1, this.y  ),
+            xykey(this.x-1, this.y+1), xykey(this.x, this.y+1), xykey(this.x+1, this.y+1)
+        ], (this.x, this.y);
+    n: func=>[xykey(this.x-1, this.y-1), xykey(this.x, this.y-1), xykey(this.x+1, this.y-1)], (this.x, this.y-1);
+    s: func=>[xykey(this.x-1, this.y+1), xykey(this.x, this.y+1), xykey(this.x+1, this.y+1)], (this.x, this.y+1);
+    w: func=>[xykey(this.x-1, this.y-1), xykey(this.x-1, this.y), xykey(this.x-1, this.y+1)], (this.x-1, this.y);
+    e: func=>[xykey(this.x+1, this.y-1), xykey(this.x+1, this.y), xykey(this.x+1, this.y+1)], (this.x+1, this.y);
+};
+let shl = func(a) {
+    return slice(a, 1, len(a)) + [a.0];
+};
+let Field = func => struct{
+    f: map{};
+    keys: [];
+    free: func(key)=>!has(this.f, key);
+    add: func(cell) {
+        this.f.(cell.key()) = cell;
+    };
+    move: func(cell, tox, toy) {
+        delete(this.f, cell.key());
+        cell.x = tox;
+        cell.y = toy;
+        this.add(cell);
+    };
+    dirs: ["n", "s", "w", "e"];
+    step: func {
+        let propositions = map{}; // [tox, toy]->[elfkeys]
+        for elf in this.f {
+            for dir in ["a"]+this.dirs {
+                let free = true;
+                let keys, dest = elf.(dir)();
+                for key in keys {
+                    free = free && !has(this.f, key);
+                };
+                if free {
+                    let tox, toy = dest;
+                    if !has(propositions, [tox, toy]) {
+                        propositions.([tox, toy]) = [];
+                    };
+                    propositions.([tox, toy]) += [elf.key()];
+                    break;
+                };
+            };
+        };
+
+        for dest, candidates in propositions {
+            if len(candidates) != 1 {
+                continue;
+            };
+
+            let tox, toy = dest.0, dest.1;
+            this.move(this.f.(candidates.0), tox, toy);
+        };
+
+        this.dirs = shl(this.dirs);
+    };
+    dimensions: func{
+        let minx, maxx, miny, maxy = 0, 0, 0, 0;
+        let first = true;
+        for elf in this.f {
+            if first {
+                minx = elf.x;
+                maxx = elf.x;
+                miny = elf.y;
+                maxy = elf.y;
+                first = false;
+            };
+            minx = std.min(minx, elf.x);
+            maxx = std.max(maxx, elf.x);
+            miny = std.min(miny, elf.y);
+            maxy = std.max(maxy, elf.y);
+        };
+        return struct{
+            minx: minx;
+            miny: miny;
+            maxx: maxx;
+            maxy: maxy;
+        };
+    };
+    print: func {
+        let dim = this.dimensions();
+        for y in std.xrange(dim.miny, dim.maxy+1) {
+            for x in std.xrange(dim.minx, dim.maxx+1) {
+                if has(this.f, xykey(x, y)) {
+                    print("#");
+                } else {
+                    print(".");
+                };
+            };
+            println("");
+        };
+    };
+};
+
+let field = Field();
+for y, line in lines {
+    for x in std.range(len(line)) {
+        if line.(x) == "#" {
+            field.add(Elf(x, y));
+        };
+    };
+};
+
+//println(0);
+//field.print();
+//println("");
+for i in std.range(10) {
+    field.step();
+
+    //println(i+1);
+    //field.print();
+    //println("");
+};
+
+let dim = field.dimensions();
+println((dim.maxx-dim.minx+1)*(dim.maxy-dim.miny+1)-len(field.f));

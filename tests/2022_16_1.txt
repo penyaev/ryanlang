@@ -1,0 +1,149 @@
+let std = import("src/std.txt");
+let Valve = func(name, rate, edges) => struct {
+    name: name;
+    rate: rate;
+    edges: strsplit(edges, ", ");
+};
+let input = [
+
+    Valve("TB", 20, "DN"),
+    Valve("SY", 0, "OJ, RZ"),
+    Valve("EH", 0, "OL, GH"),
+    Valve("ZE", 0, "WZ, WE"),
+    Valve("RZ", 0, "GM, SY"),
+    Valve("FN", 0, "YP, DN"),
+    Valve("GH", 12, "EH, PV, BH, WY, DW"),
+    Valve("YL", 0, "GM, YZ"),
+    Valve("IA", 0, "AA, GM"),
+    Valve("WK", 0, "HJ, AA"),
+    Valve("HK", 0, "AA, OJ"),
+    Valve("WG", 0, "YP, EK"),
+    Valve("XU", 0, "EX, SK"),
+    Valve("BH", 0, "GH, DL"),
+    Valve("OI", 0, "EZ, OV"),
+    Valve("WE", 5, "ZE, YZ, BF, EZ, HJ"),
+    Valve("AC", 0, "OJ, OV"),
+    Valve("EI", 18, "OD, GS, XZ, WY, QU"),
+    Valve("CP", 0, "GS, AA"),
+    Valve("WZ", 0, "ZE, OJ"),
+    Valve("EZ", 0, "OI, WE"),
+    Valve("LI", 0, "WJ, OV"),
+    Valve("WJ", 0, "LI, YP"),
+    Valve("AQ", 0, "PF, EX"),
+    Valve("DW", 0, "EK, GH"),
+    Valve("OA", 25, "OL, PN, OD"),
+    Valve("ZV", 0, "GM, OV"),
+    Valve("CH", 0, "QU, EX"),
+    Valve("CG", 0, "PN, EK"),
+    Valve("EX", 19, "AQ, XU, CH, BF"),
+    Valve("DN", 0, "TB, FN"),
+    Valve("QU", 0, "EI, CH"),
+    Valve("QA", 0, "ZO, PU"),
+    Valve("DL", 0, "OJ, BH"),
+    Valve("BF", 0, "WE, EX"),
+    Valve("OJ", 4, "SY, WZ, AC, DL, HK"),
+    Valve("MN", 0, "AA, OV"),
+    Valve("WY", 0, "EI, GH"),
+    Valve("PF", 21, "AQ"),
+    Valve("EK", 10, "DW, WG, CG, XZ"),
+    Valve("GA", 0, "KB, YP"),
+    Valve("BW", 0, "AL, GD"),
+    Valve("YZ", 0, "WE, YL"),
+    Valve("VG", 0, "PV, GD"),
+    Valve("OD", 0, "OA, EI"),
+    Valve("GM", 13, "YL, RZ, SK, ZV, IA"),
+    Valve("YP", 22, "GA, AL, WJ, WG, FN"),
+    Valve("SK", 0, "GM, XU"),
+    Valve("PN", 0, "OA, CG"),
+    Valve("AA", 0, "CP, WK, MN, HK, IA"),
+    Valve("AL", 0, "BW, YP"),
+    Valve("OV", 7, "AC, OI, LI, ZV, MN"),
+    Valve("ZO", 23, "QA"),
+    Valve("HJ", 0, "WE, WK"),
+    Valve("KB", 0, "GA, PU"),
+    Valve("OL", 0, "OA, EH"),
+    Valve("PV", 0, "GH, VG"),
+    Valve("PU", 24, "KB, QA"),
+    Valve("GD", 17, "VG, BW"),
+    Valve("GS", 0, "CP, EI"),
+    Valve("XZ", 0, "EI, EK")
+    // 2080
+
+/*
+    Valve("AA", 0, "DD, II, BB"),
+    Valve("BB", 13, "CC, AA"),
+    Valve("CC", 2, "DD, BB"),
+    Valve("DD", 20, "CC, AA, EE"),
+    Valve("EE", 3, "FF, DD"),
+    Valve("FF", 0, "EE, GG"),
+    Valve("GG", 0, "FF, HH"),
+    Valve("HH", 22, "GG"),
+    Valve("II", 0, "AA, JJ"),
+    Valve("JJ", 21, "II")
+    // 1651
+*/
+];
+let valves = map{};
+for valve in input => valves.(valve.name) = valve;
+
+let distfrom = func(start) {
+    let queue = [start];
+    let pos = 0;
+    let dist = map{};
+    let MAXDIST = len(input)+1;
+    for v in input => dist.(v.name) = MAXDIST;
+    dist.(start) = 0;
+    while pos < len(queue) {
+        let valve = valves.(queue.(pos));
+        pos += 1;
+
+        for adj in valve.edges {
+            if dist.(adj) > dist.(valve.name) + 1 {
+                dist.(adj) = dist.(valve.name) + 1;
+                queue += [adj];
+            };
+        };
+    };
+
+    return dist;
+};
+let dists = map{};
+for v in input {
+    dists.(v.name) = distfrom(v.name);
+};
+
+let step = func(start, visited, T) {
+    let bestvalve = start;
+    let bestscore = 0;
+    let dist = dists.(start);
+
+    let best = 0;
+    for valve in input {
+        if visited.(valve.name) || valve.rate == 0 {
+            continue;
+        };
+        let tl = T - (dist.(valve.name) + 1);
+        if tl <= 0 {
+            continue;
+        };
+
+        let visitedcopy = map{};
+        for v in input {
+            visitedcopy.(v.name) = visited.(v.name);
+        };
+        visitedcopy.(valve.name) = true;
+
+        let try = step(valve.name, visitedcopy, tl) + valve.rate * tl;
+        if best < try {
+            best = try;
+        };
+    };
+    return best;
+};
+
+let visited = map{};
+for v in input {
+    visited.(v.name) = false;
+};
+visited.("AA") = true;
+println(step("AA", visited, 30));

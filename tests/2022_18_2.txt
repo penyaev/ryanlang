@@ -1,7 +1,7 @@
 exports {
     test;
 };
-let std = import("std.txt");
+let std = import("src/std.txt");
 /*
 let input = [
     "2,2,2",

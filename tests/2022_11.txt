@@ -1,8 +1,8 @@
 exports {
     test;
 };
-let std = import("std.txt");
-let big = import("bignum.txt");
+let std = import("src/std.txt");
+let big = import("src/bignum.txt");
 
 let Monkey = func(items, op, test, iftrue, iffalse) => struct {
     items: items;

@@ -1,7 +1,7 @@
 exports {
     range; xrange; revrange;
     sort; sortn; rsort; rsortn;
-    repeat; repeatcb;
+    repeat; repeatcb; Matrix; Matrix3d;
     min; max; abs;
     last;
     keys;
@@ -82,6 +82,16 @@ let repeatcb = func(cb, cnt) {
         ret += [cb()];
     };
     return ret;
+};
+let Matrix = func (w, h, v) => struct{
+    f: repeatcb((func=>repeat(v, w)), h);
+    at: func(x, y) => this.f.(y).(x);
+    set: func(x, y, v) => this.f.(y).(x) = v;
+};
+let Matrix3d = func (w, h, d, v) => struct{
+    f: repeatcb((func=>repeatcb((func=>repeat(v, w)), h)), d);
+    at: func(x, y, z) => this.f.(z).(y).(x);
+    set: func(x, y, z, v) => this.f.(z).(y).(x) = v;
 };
 let keys = func(m) => for k, v in m => k;
 let or = func(m, key, default) => if has(m, key) => m.(key) else => default;

@@ -1,7 +1,7 @@
 exports {
     test;
 };
-let std = import("std.txt");
+let std = import("src/std.txt");
 let lines = readlines("tests/2022_20_input_demo.txt"); // 1623178306
 //let lines = readlines("tests/2022_20_input.txt"); // 3760092545849
 let Node = func(left, right, value) => struct{

@@ -98,13 +98,16 @@ for x in [1, 2, 3] { /*...*/ };       // x=1, 2, 3...
 for i, v in [10, 20, 30] { /*...*/ }; // i=0, v=10; i=1, v=20; i=2, v=30;
 while x > 10 { x--; };
 
+// you can also iterate over maps
+for k, v in m { /*...*/ }; // k iterates over keys, v iterates over values
+
 // arrow expressions in for loops
 let squares = for x in [1, 2, 3] => x*x; // a=[1, 4, 9]
 ```
 
 #### import and exports
 ```
-let std = import("std.txt");
+let std = import("src/std.txt");
 std.max(10, 20); // 20
 
 // exports must come first in a file

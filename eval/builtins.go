@@ -174,6 +174,18 @@ var builtinFunctions = map[string]struct {
 			return &object.ReturnObject{Obj: &object.Boolean{Value: ok}}
 		},
 	},
+	"delete": {
+		arguments: []string{"m", "k"},
+		body: func(env *object.Environment, args map[string]object.Object) object.Object {
+			m := args["m"]
+			k := args["k"]
+			if m.Type() != object.MAP || !object.IsHashable(k) {
+				return &object.Error{Msg: "a map and a hashable object expected as arguments"}
+			}
+			delete(m.(*object.Map).Fields, k.(object.Hashable).Hash())
+			return &object.ReturnObject{Obj: &object.Null{}}
+		},
+	},
 }
 
 func newBuiltinEnvironment() *object.Environment {

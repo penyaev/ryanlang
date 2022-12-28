@@ -72,7 +72,7 @@ while x > 10 { x--; };
 let squares = for x in [1, 2, 3] => x*x; // a=[1, 4, 9]
 
 // import
-let std = import("std.txt");
+let std = import("src/std.txt");
 std.max(10, 20); // 20
 
 // exports must come first in a file

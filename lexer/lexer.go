@@ -27,6 +27,8 @@ type Lexer struct {
 // e.g.: func(x) { x = 10; }
 // will it overwrite x from the parent scope?
 
+// todo: use tuples to access multi-dimensional arrays: arr.(x, y) instead of arr.(y).(x)
+
 // todo: infinite recursive calls?
 /**
 let Node = func => struct{
@@ -42,7 +44,7 @@ let Node = func => struct{
 // let index = (func => for i in [10, 20, 30] => if i == 20 => return i)();
 
 // todo: use
-// use import("std.txt");
+// use import("src/std.txt");
 // range(10); // no need to write "std." prefix
 
 // todo: type checks
@@ -81,7 +83,7 @@ let Set = func => struct {...};
 
 
 <other.txt>
-let std = import("std.txt");
+let std = import("src/std.txt");
 std.sort(array, less);
 std.range(10);
 */
