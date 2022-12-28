@@ -2,7 +2,7 @@ Ryanlang is a toy language written in Go. It mainly pursues educational and ente
 
 It is a simple tree-walking interpreter and of course it's not optimized for speed or memory or anything. It has some basic type and error reporting system.
 
-To get a taste of what code looks like in ryanlang, check out `src/algo.txt` or `std.txt`.
+To get a taste of what code looks like in ryanlang, check out `src/algo.txt` or `src/std.txt`.
 
 ### Language features
 Language is a mix of what you would typically see in Javascript and Go with a few differences.
