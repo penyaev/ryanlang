@@ -4,7 +4,7 @@ It is a simple language that supports two execution engines: tree-walking interp
 
 It also has a cli- and a web-debugger with support for step-by-step execution, breakpoints and source mapping.
 
-To get a taste of what code looks like in ryanlang, check out `src/algo.txt` or `std.txt`.
+To get a taste of what code looks like in ryanlang, check out `src/algo.txt` or `src/std.txt`.
 
 ### Language features
 Language is a mix of what you would typically see in Javascript and Go with a few differences.
