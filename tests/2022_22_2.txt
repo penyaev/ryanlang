@@ -121,7 +121,7 @@ let Field = func(size)=>struct{
                 nx = this.size*2-1;
                 nd = 2; // left
             } else {
-                panic(ys);
+                panic(xs);
             };
 
             cell = this.at(nx, ny);

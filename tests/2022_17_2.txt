@@ -142,7 +142,7 @@ while round < limit {
         if x+dx >= 0 && x+dx <= WIDTH-shapew {
             let ok = true;
             for sy, line in shape {
-                for sx in range(len(line)) {
+                for sx in std.range(len(line)) {
                     if line.(sx) == "." {
                         continue;
                     };
@@ -167,7 +167,7 @@ while round < limit {
         iter++;
         if iter > 3 {
             for sy, line in shape {
-                for sx in range(len(line)) {
+                for sx in std.range(len(line)) {
                     if line.(sx) == "." {
                         continue;
                     };
@@ -186,7 +186,7 @@ while round < limit {
             y -= 1;
         } else {
             for sy, line in shape {
-                for sx in range(len(line)) {
+                for sx in std.range(len(line)) {
                     if line.(sx) == "." {
                         continue;
                     };

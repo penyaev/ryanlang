@@ -9,12 +9,14 @@ import (
 type prefixParseFunction func() ast.Expression
 
 func (p *Parser) parseNumber() ast.Expression {
+	loc := p.cur.Location
 	number, err := strconv.Atoi(p.consume(lexer.TokenTypeNumber).Literal)
 	if err != nil {
 		panic(err)
 	}
 	return ast.NumberExpression{
 		Value: number,
+		Loc:   loc,
 	}
 }
 func (p *Parser) parseString() ast.Expression {
@@ -23,10 +25,6 @@ func (p *Parser) parseString() ast.Expression {
 		Loc:   loc,
 		Value: p.consume(lexer.TokenTypeString).Literal,
 	}
-}
-func (p *Parser) parseNull() ast.Expression {
-	p.consume(lexer.TokenTypeNull)
-	return ast.Null{}
 }
 func (p *Parser) parseIdentifier() ast.Expression {
 	loc := p.cur.Location
@@ -109,7 +107,7 @@ func (p *Parser) readBlockExpression() ast.BlockExpression {
 	}
 	p.consume(lexer.TokenTypeLBrace)
 	for p.cur.Kind != lexer.TokenTypeRBrace {
-		result.Exprs = append(result.Exprs, p.ReadStatement())
+		result.Stmts = append(result.Stmts, p.ReadStatement())
 	}
 	p.consume(lexer.TokenTypeRBrace)
 	return result
@@ -120,7 +118,9 @@ func (p *Parser) readArrowExpression() ast.Expression {
 	return ast.ArrowExpression{Expr: p.readExpression(precedenceLowest), Loc: loc}
 }
 func (p *Parser) parseFunc() ast.Expression {
-	result := ast.FuncExpression{}
+	result := ast.FuncExpression{
+		Loc: p.cur.Location,
+	}
 
 	p.consume(lexer.TokenTypeFunc)
 
@@ -225,9 +225,11 @@ func (p *Parser) parseExports() ast.Expression {
 	return result
 }
 func (p *Parser) parseWhile() ast.Expression {
+	loc := p.cur.Location
 	p.consume(lexer.TokenTypeWhile)
 	result := ast.WhileExpression{
 		Condition: p.readExpression(precedenceLowest),
+		Loc:       loc,
 	}
 
 	if p.cur.Kind == lexer.TokenTypeLBrace {

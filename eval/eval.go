@@ -40,8 +40,6 @@ func (e *Evaluator) Eval(expr ast.Expression) object.Object {
 		return e.evalIdentifier(expr.(ast.Identifier))
 	case ast.String:
 		return e.evalString(expr.(ast.String))
-	case ast.Null:
-		return e.evalNull(expr.(ast.Null))
 	case ast.NumberExpression:
 		return e.evalNumber(expr.(ast.NumberExpression))
 	case ast.AssignExpression:
@@ -62,6 +60,8 @@ func (e *Evaluator) Eval(expr ast.Expression) object.Object {
 		return e.evalBlockExpression(expr.(ast.BlockExpression))
 	case ast.GroupExpression:
 		return e.evalGroupExpression(expr.(ast.GroupExpression))
+	case ast.Statement:
+		return e.evalStatement(expr.(ast.Statement))
 	case ast.IfExpression:
 		return e.evalIfExpression(expr.(ast.IfExpression))
 	case ast.GtExpression:

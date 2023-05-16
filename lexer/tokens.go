@@ -49,7 +49,6 @@ const (
 	TokenTypeColon
 	TokenTypeDot
 	TokenTypeWhile
-	TokenTypeNull
 	TokenTypeBang
 	TokenTypeLogicalAnd
 	TokenTypeLogicalOr
@@ -140,8 +139,6 @@ func (tk TokenKind) String() string {
 		return "]"
 	case TokenTypeLet:
 		return "let"
-	case TokenTypeNull:
-		return "null"
 	case TokenTypeBang:
 		return "!"
 	case TokenTypeLogicalAnd:
@@ -179,7 +176,6 @@ var keywords = map[string]TokenKind{
 	"func":     TokenTypeFunc,
 	"struct":   TokenTypeStruct,
 	"while":    TokenTypeWhile,
-	"null":     TokenTypeNull,
 	"continue": TokenTypeContinue,
 	"break":    TokenTypeBreak,
 	"for":      TokenTypeFor,

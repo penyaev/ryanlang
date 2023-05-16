@@ -1,4 +1,6 @@
 let modules = [
+    "tests/lang.txt",
+
     "tests/2022_18_1.txt",
     "tests/2022_18_2.txt",
     "tests/2022_14.txt",

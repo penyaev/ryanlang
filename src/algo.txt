@@ -7,7 +7,8 @@ let std = import("src/std.txt");
 
 // binsearch
 let search = func(array, test) {
-    let l, r = 0, len(array)-1;
+    let l = 0;
+    let r = len(array)-1;
     while l <= r {
         let i = (l+r)/2;
         if test(i) {

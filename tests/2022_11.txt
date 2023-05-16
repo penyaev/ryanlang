@@ -1,8 +1,8 @@
 exports {
     test;
 };
-let std = import("src/std.txt");
-let big = import("src/bignum.txt");
+//let std = import("src/std.txt");
+//let big = import("src/bignum.txt");
 
 let Monkey = func(items, op, test, iftrue, iffalse) => struct {
     items: items;
@@ -30,7 +30,43 @@ let monkeys = [
     Monkey([81, 86, 62, 87], (func(old) => (old + 8) % (11*2*5*7*17*19*3*13)), 13, 3, 5)
 ];
 
-for round in std.range(10000) {
+let range = func(x) {
+    let ret = makearray(x, 0);
+    let i = 0;
+    while i < x {
+        ret.(i) = i;
+        i += 1;
+    };
+    return ret;
+};
+let sort = func(a, less) {
+    if len(a) <= 1 {
+        return a;
+    };
+
+    let mid = a.(len(a)/2);
+    let left = [];
+    let right = [];
+    let middle = [];
+
+    for x in a {
+        let comp = less(x, mid);
+        if comp < 0 {
+            //left += [x];
+            append(left, x);
+        } else if comp == 0 {
+            append(middle, x);
+        } else {
+            append(right, x);
+        };
+    };
+
+    return sort(left, less)+middle+sort(right, less);
+};
+let rsortn = func(array)=>sort(array, func(a, b)=>b-a);
+
+
+for round in range(10000) {
     for monkey in monkeys {
         for w in monkey.items {
             monkey.inc();
@@ -41,6 +77,6 @@ for round in std.range(10000) {
         monkey.items = [];
     };
 };
-let cnts = std.rsortn(for monkey in monkeys => monkey.cnt);
+let cnts = rsortn(for monkey in monkeys => monkey.cnt);
 //println(cnts.0*cnts.1);
 let test = func=>cnts.0*cnts.1==17408399184;

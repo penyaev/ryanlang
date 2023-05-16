@@ -11,6 +11,7 @@ let Node = func(left, right, value) => struct{
     done: false;
 };
 let zero = struct{};
+let cnt = len(lines);
 
 let root = Node(struct{}, struct{}, 0);
 let cur = root;
@@ -55,7 +56,6 @@ let walk = func(node, dist, correction) {
 };
 
 let done = 0;
-let cnt = len(lines);
 for round in std.range(10) {
     //println(round);
     for node in nodes {

@@ -2,11 +2,11 @@ exports {
     test;
 };
 let std = import("src/std.txt");
-//let input = [
-//  "498,4 -> 498,6 -> 496,6",
-//  "503,4 -> 502,4 -> 502,9 -> 494,9"
-//];
-let input = readlines("tests/2022_14_input_demo.txt");
+let input = [
+  "498,4 -> 498,6 -> 496,6",
+  "503,4 -> 502,4 -> 502,9 -> 494,9"
+];
+//let input = readlines("tests/2022_14_input_demo.txt");
 let Point = func(x, y) => struct {x: x; y: y;};
 
 let field = struct {

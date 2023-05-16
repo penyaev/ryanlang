@@ -27,6 +27,8 @@ const (
 	MODULE
 	EXPORTS
 	TUPLE
+	CLOSURE
+	CODE // uncallable code that must be converted to closure in order to be called
 )
 
 func (t Type) String() string {
@@ -57,6 +59,10 @@ func (t Type) String() string {
 		return "break"
 	case TUPLE:
 		return "tuple"
+	case CLOSURE:
+		return "closure"
+	case CODE:
+		return "code"
 	}
 
 	panic("unknown object type: " + strconv.Itoa(int(t)))
@@ -86,7 +92,10 @@ func (e Error) Type() Type {
 }
 
 func (e Error) String() string {
-	result := e.Loc.String() + ": " + e.Msg
+	result := e.Msg
+	if e.Loc != nil {
+		result = e.Loc.String() + ": " + result
+	}
 	if e.Child != nil {
 		result += ": " + e.Child.String()
 	}
@@ -133,8 +142,8 @@ func (s String) Hash() string {
 }
 
 func (s String) String() string {
-	//return "\"" + s.Value + "\""
-	return s.Value
+	return "\"" + s.Value + "\""
+	//return s.Value
 }
 
 func (s String) Type() Type {
@@ -163,6 +172,8 @@ func (n Null) String() string {
 func (n Null) Type() Type {
 	return NULL
 }
+
+var StaticNull = Null{}
 
 type ReturnObject struct {
 	Obj Object
@@ -205,6 +216,17 @@ func (b Boolean) String() string {
 
 func (b Boolean) Type() Type {
 	return BOOLEAN
+}
+
+var StaticTrue = Boolean{Value: true}
+var StaticFalse = Boolean{Value: false}
+
+func StaticBool(b bool) Object {
+	if b {
+		return &StaticTrue
+	} else {
+		return &StaticFalse
+	}
 }
 
 type Struct struct {
@@ -320,4 +342,67 @@ func (t Tuple) String() string {
 
 func (t Tuple) Type() Type {
 	return TUPLE
+}
+
+type Closure struct {
+	Code                *Code
+	Foreigns            []*Object
+	BuiltinFunctionName string
+}
+
+func (c Closure) String() string {
+	if c.BuiltinFunctionName != "" {
+		return fmt.Sprintf("(built-in: %s)", c.BuiltinFunctionName)
+	} else {
+		return fmt.Sprintf("(closure)")
+	}
+}
+
+func (c Closure) Type() Type {
+	return CLOSURE
+}
+
+type CodeReturnScope int
+
+const (
+	// should be placed in order of decreasing "strength"
+	CodeReturnScopeRoot CodeReturnScope = iota
+	CodeReturnScopeModule
+	CodeReturnScopeFunc
+	CodeReturnScopeLoop
+	CodeReturnScopeContinue
+)
+
+func (c CodeReturnScope) String() string {
+	switch c {
+	case CodeReturnScopeRoot:
+		return "root"
+	case CodeReturnScopeModule:
+		return "module"
+	case CodeReturnScopeFunc:
+		return "func"
+	case CodeReturnScopeLoop:
+		return "loop"
+	case CodeReturnScopeContinue:
+		return "continue"
+	default:
+		panic("unknown code return scope")
+	}
+}
+
+type Code struct {
+	Code        []byte
+	Locals      int // includes arguments
+	Foreigns    int
+	Loc         *lexer.Location
+	Arguments   int
+	ReturnScope CodeReturnScope
+}
+
+func (c Code) String() string {
+	return fmt.Sprintf("(code)")
+}
+
+func (c Code) Type() Type {
+	return CODE
 }

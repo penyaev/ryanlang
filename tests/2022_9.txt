@@ -9,6 +9,7 @@ let loop = func(cnt, fn) {
         x = x+1;
     };
 };
+let append = func(array, item) => array+[item];
 let clone = func(array) {
     let ret = [];
     loop(len(array), func(i) {
@@ -27,7 +28,7 @@ let find = func(array, item) {
     };
     return -1;
 };
-let append = func(array, item) => array+[item];
+
 let Set = func {
     let storage = [];
     return struct {
@@ -122,7 +123,7 @@ loop(len(input), func(line) {
         h.y = h.y + dy;
         ts.0 = keepup(ts.0, h);
         if abs(ts.0.x-h.x) > 1 && abs(ts.0.y-h.y) > 1 {
-            error();
+            panic();
         };
 
         loop(8, func(j) {
@@ -131,7 +132,7 @@ loop(len(input), func(line) {
             if abs(ts.(j+1).x-ts.(j).x) > 1 && abs(ts.(j+1).y-ts.(j).y) > 1 {
                 print(ts);
                 print(h);
-                error();
+                panic();
             };
         });
 

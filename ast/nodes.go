@@ -33,16 +33,6 @@ func (s String) Location() *lexer.Location {
 
 func (s String) String() string { return "\"" + s.Value + "\"" }
 
-type Null struct {
-	loc *lexer.Location
-}
-
-func (n Null) Location() *lexer.Location {
-	return n.loc
-}
-
-func (n Null) String() string { return "null" }
-
 type LetExpression struct {
 	Identifiers    []Identifier
 	Initialization Expression
@@ -80,15 +70,16 @@ func (ce CallExpression) String() string {
 
 type NumberExpression struct {
 	Value int
-	loc   *lexer.Location
+	Loc   *lexer.Location
 }
 
 func (n NumberExpression) Location() *lexer.Location {
-	return n.loc
+	return n.Loc
 }
 
 func (n NumberExpression) String() string { return fmt.Sprintf("%v", n.Value) }
 
+// todo: support multi-assign? e.g. `x, y = 1, 2`
 type AssignExpression struct {
 	Identifier Identifier
 	Value      Expression
@@ -413,7 +404,7 @@ func (b BreakExpression) String() string {
 }
 
 type BlockExpression struct {
-	Exprs []Expression
+	Stmts []Statement
 	Loc   *lexer.Location
 }
 
@@ -423,10 +414,10 @@ func (b BlockExpression) Location() *lexer.Location {
 
 func (b BlockExpression) String() string {
 	s := []string{}
-	for _, expr := range b.Exprs {
-		s = append(s, expr.String())
+	for _, st := range b.Stmts {
+		s = append(s, st.String())
 	}
-	return "{ " + strings.Join(s, "; ") + " }"
+	return "{ " + strings.Join(s, " ") + " }"
 }
 
 type GroupExpression struct {
@@ -440,6 +431,18 @@ func (g GroupExpression) Location() *lexer.Location {
 
 func (g GroupExpression) String() string {
 	return "(" + g.Expr.String() + ")"
+}
+
+type Statement struct {
+	Expr Expression
+}
+
+func (s Statement) Location() *lexer.Location {
+	return s.Expr.Location()
+}
+
+func (s Statement) String() string {
+	return s.Expr.String() + ";"
 }
 
 type BuiltinFunction struct {
@@ -511,11 +514,11 @@ func (f FieldAccessExpression) String() string {
 type WhileExpression struct {
 	Condition Expression
 	Body      Expression
-	loc       *lexer.Location
+	Loc       *lexer.Location
 }
 
 func (w WhileExpression) Location() *lexer.Location {
-	return w.loc
+	return w.Loc
 }
 
 func (w WhileExpression) String() string {
@@ -576,12 +579,11 @@ func (n NegationExpression) String() string {
 
 type Module struct {
 	Name  string
-	Exprs []Expression
-	loc   *lexer.Location
+	Block BlockExpression
 }
 
 func (m Module) Location() *lexer.Location {
-	return m.loc
+	return m.Block.Location()
 }
 
 func (m Module) String() string {

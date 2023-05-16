@@ -79,6 +79,7 @@ let strslice = func(s, start, end) {
 let mods = func(x, y) {
     let i = 0;
 
+    debugger();
     let part = "0";
     while i < len(x) {
         part += x.(i);
@@ -92,6 +93,7 @@ let mods = func(x, y) {
 
     return itoa(atoi(part) % y);
 };
+debugger();
 let test = func {
     for tc in [
         (func=>mult("123", "234") == "28782"),

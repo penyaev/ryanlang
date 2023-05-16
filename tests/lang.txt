@@ -1,0 +1,99 @@
+exports {
+    test;
+};
+
+let test = func {
+    let tests = [
+        func () {
+            let globalNum = 10;
+            let sum = func(a, b) {
+                let c = a + b;
+                return c + globalNum;
+            };
+            let outer = func() {
+                return sum(1, 2) + sum(3, 4) + globalNum;
+            };
+            return outer() + globalNum == 50;
+        },
+        func () {
+            let f = func=>10;
+            let x = 17;
+            let y = 20;
+            if (let x = f()) > 5 {
+                y = x+1;
+            };
+            return (y == 11 && x == 17);
+        },
+        func () {
+            let x = 10;
+            let f = func=>x;
+            let y1 = f();
+            x++;
+            let y2 = f();
+            let f2 = func {
+                let x = 100;
+                return f();
+            };
+            let y3 = f();
+            return (y1 == 10 && y2 == 11 && y3 == 11);
+        },
+        func () {
+            let adder = func(x)=>func(y)=>x+y;
+            let add5 = adder(5);
+            return add5(3) == 8;
+        },
+        func () {
+            if false && 1/0 { // "1/0" should not be eval'ed because there's false on the left
+                panic("unreachable");
+            };
+            return true;
+        },
+        func () {
+            let x = 10;
+            let y1 = 1;
+            let y2 = 2;
+            if true {
+                y1 = x;
+                let x = 20;
+                y2 = x;
+            };
+            return x == 10 && y1 == 10 && y2 == 20;
+        },
+        func () {
+            let out = 1;
+            let f = func(x){
+                out++;
+                x++;
+            };
+            let a = 10;
+            f(a);
+            return a == 10 && out == 2;
+        },
+        func () {
+            let y = 1000;
+            let s = struct {
+                x: 777+y;
+                incr: func=>this.x+y;
+            };
+            let o = s.incr();
+            y = 2000;
+            return o == 2777 && s.incr() == 3777;
+        }, func () {
+           let s = struct{
+               b: 100;
+               x: func=>struct{
+                 a: func=>this.b+1;
+                 b: 10;
+                 c: this.b+1;
+               };
+             };
+            return s.x().a() == 11 && s.x().c == 101;
+       }
+    ];
+
+    for ti, tc in tests => if !tc() {
+        println("test failed: " + itoa(ti));
+        return false;
+    };
+    return true;
+};

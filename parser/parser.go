@@ -21,7 +21,6 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixFunctions = map[lexer.TokenKind]prefixParseFunction{
 		lexer.TokenTypeNumber:         p.parseNumber,
 		lexer.TokenTypeString:         p.parseString,
-		lexer.TokenTypeNull:           p.parseNull,
 		lexer.TokenTypeLet:            p.parseLet,
 		lexer.TokenTypeIdentifier:     p.parseIdentifier,
 		lexer.TokenTypeImport:         p.parseImport,
@@ -119,21 +118,25 @@ func (p *Parser) readExpression(precedence int) ast.Expression {
 func (p *Parser) Eof() bool {
 	return p.cur.Kind == lexer.TokenTypeEof
 }
-func (p *Parser) ReadStatement() ast.Expression {
+func (p *Parser) ReadStatement() ast.Statement {
 	expr := p.readExpression(precedenceLowest)
 	p.consume(lexer.TokenTypeSemicolon)
-	return expr
+	return ast.Statement{Expr: expr} // todo: return ast.Statement?
 }
-func (p *Parser) ReadModule(name string) ast.Expression {
+func (p *Parser) ReadModule(name string) ast.Module {
+	loc := p.cur.Location
 	ret := ast.Module{
 		Name: name,
+		Block: ast.BlockExpression{
+			Loc: loc,
+		},
 	}
 	for !p.Eof() {
 		st := p.ReadStatement()
-		if _, ok := st.(ast.Exports); ok && len(ret.Exprs) > 0 {
+		if _, ok := st.Expr.(ast.Exports); ok && len(ret.Block.Stmts) > 0 {
 			panic("`exports` must come first statement in a module")
 		}
-		ret.Exprs = append(ret.Exprs, st)
+		ret.Block.Stmts = append(ret.Block.Stmts, st)
 	}
 	return ret
 }
