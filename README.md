@@ -2,7 +2,9 @@ Ryanlang is a toy language written in Go. It mainly pursues educational and ente
 
 It is a simple language that supports two execution engines: tree-walking interpreter and a VM that executes a compiled byte-code. Of course it's not optimized for speed or memory or anything. It has some basic type and error reporting system.
 
-It also has a cli- and a web-debugger with support for step-by-step execution, breakpoints and source mapping.
+It also has a cli- and a web-debugger with support for step-by-step execution, breakpoints and source mapping:
+![telegram-cloud-photo-size-1-5066686668014201679-y](https://github.com/penyaev/ryanlang/assets/7707147/b0de3343-9144-4b75-b379-4595d34469cc)
+
 
 To get a taste of what code looks like in ryanlang, check out `src/algo.txt` or `src/std.txt`.
 
